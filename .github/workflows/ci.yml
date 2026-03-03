@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: crossfit
+          MYSQL_USER: app
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo, pdo_mysql
+          coverage: none
+
+      - name: Create crossfit_test database
+        run: |
+          mysql -h 127.0.0.1 -u root -proot < sql/init.sql
+          mysql -h 127.0.0.1 -u root -proot < sql/init_test.sql
+
+      - name: Install dependencies
+        working-directory: src
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Copy env files
+        working-directory: src
+        run: |
+          cp .env.example .env
+          cp .env.example .env.test
+          sed -i 's/DB_HOST=db/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_HOST=db/DB_HOST=127.0.0.1/' .env.test
+          sed -i 's/DB_NAME=crossfit/DB_NAME=crossfit_test/' .env.test
+          sed -i 's/APP_ENV=production/APP_ENV=test/' .env.test
+
+      - name: Run unit tests
+        working-directory: src
+        run: composer test:unit
+
+      - name: Run feature tests
+        working-directory: src
+        run: composer test:feature
