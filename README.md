@@ -20,7 +20,7 @@ API REST em PHP puro para consulta de ranking de recordes pessoais por movimento
 ### 1. Clone o repositório
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/caarloshenriq/crossfit-ranking.git
 cd crossfit-ranking
 ```
 
