@@ -32,13 +32,13 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: "8.4"
           extensions: pdo, pdo_mysql
           coverage: none
 
-      - name: Create crossfit_test database
+      - name: Create databases
         run: |
-          mysql -h 127.0.0.1 -u root -proot < sql/init.sql
+          mysql -h 127.0.0.1 -u root -proot crossfit < sql/init.sql
           mysql -h 127.0.0.1 -u root -proot < sql/init_test.sql
 
       - name: Install dependencies
