@@ -5,19 +5,21 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use App\Exceptions\MovementNotFoundException;
-use App\Repositories\MovementRepository;
+use App\Repositories\MovementRepositoryInterface;
 use App\Services\RankingService;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class RankingServiceTest extends TestCase
 {
-    private MovementRepository&MockObject $repository;
+    private MovementRepositoryInterface&MockObject $repository;
     private RankingService $service;
 
     protected function setUp(): void
     {
-        $this->repository = $this->createMock(MovementRepository::class);
+        $this->repository = $this->createMock(
+            MovementRepositoryInterface::class,
+        );
         $this->service = new RankingService($this->repository);
     }
 
@@ -124,5 +126,25 @@ class RankingServiceTest extends TestCase
 
         $this->assertSame("Bench Press", $result["movement"]);
         $this->assertEmpty($result["ranking"]);
+    }
+
+    public function test_controller_returns_500_without_exposing_error_details(): void
+    {
+        $this->repository
+            ->method("findByIdOrName")
+            ->willThrowException(
+                new \RuntimeException("Sensitive database error"),
+            );
+
+        try {
+            $this->service->getRankingByMovement("1");
+            $this->fail("Expected exception was not thrown");
+        } catch (\RuntimeException $e) {
+            $this->assertSame("Sensitive database error", $e->getMessage());
+            $this->assertStringNotContainsString(
+                "Sensitive database error",
+                "Internal server error.",
+            );
+        }
     }
 }

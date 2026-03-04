@@ -24,14 +24,9 @@ class RankingController
             $this->json($data, 200);
         } catch (MovementNotFoundException $e) {
             $this->json(["error" => $e->getMessage()], 404);
-        } catch (Throwable $e) {
-            $this->json(
-                [
-                    "error" => $e->getMessage(),
-                    "trace" => $e->getTraceAsString(),
-                ],
-                500,
-            );
+        } } catch (Throwable $e) {
+            Logger::error('Unexpected error on ranking endpoint', $e);
+            $this->json(['error' => 'Internal server error.'], 500);
         }
     }
 

@@ -7,7 +7,7 @@ namespace App\Repositories;
 use App\Config\Database;
 use PDO;
 
-class MovementRepository
+class MovementRepository implements MovementRepositoryInterface
 {
     private PDO $db;
 

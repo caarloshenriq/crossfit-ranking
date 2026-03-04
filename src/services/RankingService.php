@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Repositories\MovementRepository;
+use App\Repositories\MovementRepositoryInterface;
 use App\Exceptions\MovementNotFoundException;
 
 class RankingService
 {
-    private MovementRepository $repository;
+    private MovementRepositoryInterface $repository;
 
-    public function __construct(MovementRepository $repository)
+    public function __construct(MovementRepositoryInterface $repository)
     {
         $this->repository = $repository;
     }
